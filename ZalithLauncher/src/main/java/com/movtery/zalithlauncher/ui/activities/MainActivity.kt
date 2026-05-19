@@ -221,8 +221,8 @@ class MainActivity : BaseAppCompatActivity() {
                     is EventViewModel.Event.DownloadPlugins -> {
                         showDownloadPlugins(event.link)
                     }
-                    is EventViewModel.Event.Launch.Main -> {
-                        launchGameViewModel.tryLaunch()
+                    is EventViewModel.Event.Launch.Game -> {
+                        launchGameViewModel.tryLaunch(event.version)
                     }
                     is EventViewModel.Event.Launch.PlayServer -> {
                         launchGameViewModel.quickPlayServer(event.version, event.address)
