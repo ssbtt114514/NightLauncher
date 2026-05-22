@@ -139,7 +139,7 @@ androidComponents {
                     task.doLast {
                         val arch = System.getProperty("arch", "all")
                         val assetsDir = task.outputDir.get().asFile
-                        val jreList = listOf("jre-8", "jre-17", "jre-21")
+                        val jreList = listOf("jre-8", "jre-17", "jre-21", "jre-25")
                         val tag = "JREAssetsCleanup"
                         logger.lifecycle("[$tag] arch: $arch")
                         jreList.forEach { jreVersion ->
