@@ -79,8 +79,6 @@
     <string name="error_parse_failed">Gagal mengurai data</string>
     <string name="error_unauthorized">(%s) Silakan periksa kredensial Anda dan coba lagi</string>
     <string name="error_notfound">(%s) Sumber daya yang diminta tidak ditemukan</string>
-    <string name="error_client_error">(%s) Kesalahan klien</string>
-    <string name="error_unknown">Kesalahan tidak diketahui: %s</string>
     <string name="splash_screen_unpack_desc">Launcher perlu menginstal file ini untuk memastikan Minecraft berjalan dengan benar. Mereka termasuk dalam aplikasi dan harus diekstrak terlebih dahulu. Klik tombol di bawah ini untuk memulai ekstraksi dan pembaruan.</string>
     <string name="splash_screen_installing">Launcher sedang mengekstrak file ini. Setelah selesai, Anda akan secara otomatis memasuki layar utama. Silahkan tunggu dengan sabar.</string>
     <string name="splash_screen_agree">Pasang</string>
@@ -1229,4 +1227,10 @@
     <string name="game_menu_option_hotbar_double_click">Ketuk dua kali untuk menukar item dengan off-hand</string>
     <string name="game_menu_option_hotbar_long_click">Tekan lama untuk menjatuhkan item terpilih</string>
     <string name="game_menu_option_hotbar_long_click_delay">Jeda tekan lama hotbar</string>
+    <string name="download_category_by_id">Cari berdasarkan ID</string>
+    <string name="download_assets_id_holder">ID Project</string>
+    <string name="download_assets_id_tip">Cari project berdasarkan ID</string>
+    <string name="download_assets_id_not_found">Project tidak ditemukan!</string>
+    <string name="download_assets_id_unsupported">Project tidak didukung!</string>
+    <string name="settings_launcher_color_theme_style">Gaya Palet</string>
 </resources>

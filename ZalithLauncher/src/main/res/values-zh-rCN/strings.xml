@@ -127,8 +127,6 @@
     <string name="error_network_unreachable">网络不可用</string>
     <string name="error_connection_failed">无法连接到服务器</string>
     <string name="error_parse_failed">数据解析失败</string>
-    <string name="error_client_error">（%s）客户端错误</string>
-    <string name="error_unknown">未知错误：%s</string>
 
     <string name="error_bad_request">(%s) 服务器无法处理该请求</string>
     <string name="error_unauthorized">(%s) 请检查登录凭证并重试</string>
@@ -1032,6 +1030,7 @@
     <string name="settings_gamepad_config_no_items">未创建配置，无法切换</string>
     <string name="settings_launcher_color_theme_title">颜色主题</string>
     <string name="settings_launcher_color_theme_summary">更改启动器的整体颜色主题</string>
+    <string name="settings_launcher_color_theme_style">配色风格</string>
     <string name="settings_launcher_dark_mode_title">深色模式</string>
     <string name="settings_launcher_language">语言</string>
     <string name="settings_launcher_full_screen_title">页面全屏化</string>

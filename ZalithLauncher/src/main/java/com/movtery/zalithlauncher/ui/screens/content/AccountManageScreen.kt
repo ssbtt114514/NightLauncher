@@ -20,6 +20,7 @@ package com.movtery.zalithlauncher.ui.screens.content
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -33,12 +34,14 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.scrollbar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -125,12 +128,14 @@ private data class AccountActions(
 
 /**
  * 进入账号管理器时，可附加的打开登录菜单选项
- * @property NONE 不打开菜单
- * @property MICROSOFT 打开微软登录菜单
- * @property NORMAL 打开总登录菜单
  */
 enum class FirstLoginMenu {
-    NONE, MICROSOFT, NORMAL
+    /** 不打开菜单 */
+    NONE,
+    /** 打开微软登录菜单 */
+    MICROSOFT,
+    /** 打开总登录菜单 */
+    NORMAL
 }
 
 /**
@@ -701,11 +706,17 @@ private fun AccountsLayout(
         shape = MaterialTheme.shapes.extraLarge
     ) {
         if (accounts.isNotEmpty()) {
+            val scrollState = rememberLazyListState()
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
+                    .scrollbar(
+                        state = scrollState.scrollIndicatorState,
+                        orientation = Orientation.Vertical,
+                    )
                     .clip(MaterialTheme.shapes.extraLarge),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                state = scrollState,
             ) {
                 items(accounts, key = { it.uniqueUUID }) { account ->
                     AccountItem(

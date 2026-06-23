@@ -77,6 +77,7 @@ object LaunchGame {
         val downloadTask = createDownloadTask(
             context = context,
             version = version,
+            account = account,
             exitActivity = exitActivity,
             waitForVulkanChecker = waitForVulkanChecker,
             submitError = submitError
@@ -108,6 +109,7 @@ object LaunchGame {
     private fun createDownloadTask(
         context: Context,
         version: Version,
+        account: Account,
         exitActivity: () -> Unit,
         waitForVulkanChecker: suspend () -> Unit,
         submitError: (ErrorViewModel.ThrowableMessage) -> Unit
@@ -124,7 +126,7 @@ object LaunchGame {
                 task.updateMessage(R.string.game_vulkan_check_title)
                 checkVulkanCapabilities(version, waitForVulkanChecker)
 
-                runGame(context, version)
+                runGame(context, version, account)
                 exitActivity()
             },
             onError = { message ->
@@ -220,7 +222,7 @@ object LaunchGame {
                         else -> {
                             Logger.error(TAG, "An unknown exception was caught!", error)
                             val errorMessage = error.localizedMessage ?: error.message ?: error::class.qualifiedName ?: "Unknown error"
-                            context.getString(R.string.error_unknown, errorMessage)
+                            context.getString(R.string.empty_holder, errorMessage)
                         }
                     }
 
