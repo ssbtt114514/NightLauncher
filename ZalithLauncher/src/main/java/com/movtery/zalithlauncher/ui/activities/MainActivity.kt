@@ -471,6 +471,10 @@ class MainActivity : BaseAppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleImportIfNeeded(intent)
+        // 重载渲染器
+        Renderers.init(true)
+        // 重载插件
+        PluginLoader.loadAllPlugins(this, true)
     }
 
     /**

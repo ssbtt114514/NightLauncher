@@ -57,7 +57,7 @@ object PluginLoader {
         RendererV2PluginManager.clearPlugin()
         NativePluginManager.clearPlugin()
 
-        RendererV2PluginManager.initialize(context)
+        RendererV2PluginManager.initialize(context) { apkPluginList.add(it) }
 
         val queryIntentActivities =
             context.packageManager.queryIntentActivities(
@@ -76,14 +76,21 @@ object PluginLoader {
         }
         FFmpegPluginManager.loadPlugin(context) { apkPluginList.add(it) }
 
-        if (RendererPluginManager.isAvailable()) {
-            RendererPluginManager.getRendererList().filter { plugin ->
-                !Renderers.addRenderer(plugin)
-            }.takeIf {
-                it.isNotEmpty()
-            }?.let { failedToLoadList ->
-                RendererPluginManager.removeRenderer(failedToLoadList)
-            }
+        // 加载旧架构渲染器插件
+        RendererPluginManager.getRendererList().filter { plugin ->
+            !Renderers.addRenderer(plugin)
+        }.takeIf {
+            it.isNotEmpty()
+        }?.let { failedToLoadList ->
+            RendererPluginManager.removeRenderer(failedToLoadList)
+        }
+        // 加载新架构渲染器插件
+        RendererV2PluginManager.getRendererList().filter { plugin ->
+            !Renderers.addRenderer(plugin)
+        }.takeIf {
+            it.isNotEmpty()
+        }?.let { failedToLoadList ->
+            RendererV2PluginManager.removeRenderer(failedToLoadList)
         }
 
         //全部已加载的插件

@@ -20,51 +20,90 @@ package com.movtery.zalithlauncher.game.plugin.renderer_v2
 
 import android.content.Context
 import android.content.pm.PackageManager
+import com.movtery.zalithlauncher.R
+import com.movtery.zalithlauncher.game.plugin.ApkPlugin
+import com.movtery.zalithlauncher.game.plugin.cacheAppIcon
 import com.movtery.zalithlauncher.game.plugin.renderer_v2.data.RendererConfigList
 import com.movtery.zalithlauncher.path.GLOBAL_JSON
 import com.movtery.zalithlauncher.utils.logging.Logger
 
 object RendererV2PluginManager {
     private const val TAG = "RendererV2Plugin"
-    private val rendererPluginList: MutableList<RendererV2Plugin> = mutableListOf()
+    private val rendererPluginList: MutableList<RendererV2Data> = mutableListOf()
+    private val packageNameList: MutableList<String> = mutableListOf()
 
-    fun getRendererList(): List<RendererV2Plugin> = rendererPluginList
+    /**
+     * 获取所有已加载的插件提供的渲染器数据
+     */
+    fun getRendererList(): List<RendererV2Data> = rendererPluginList
+
+    /**
+     * 获取所有已加载的插件的包名
+     */
+    fun getPackageNameList(): List<String> = packageNameList
 
     fun clearPlugin() {
         rendererPluginList.clear()
+        packageNameList.clear()
     }
 
     /**
      * 从 MMKV 加载已保存的插件配置
      * 同时清理已卸载插件对应的残留配置
      */
-    fun initialize(context: Context) {
+    fun initialize(
+        context: Context,
+        loaded: (ApkPlugin) -> Unit
+    ) {
         val mmkv = rendererPluginMMKV()
         val keys = mmkv.allKeys() ?: emptyArray()
         var removedCount = 0
 
-        keys.forEach { key ->
+        val pm = context.packageManager
+
+        keys.forEach { packageName ->
             // 检查该插件是否存在
             val isInstalled = runCatching {
-                context.packageManager.getPackageInfo(key, 0)
+                pm.getPackageInfo(packageName, 0)
             }.isSuccess
             // 不存在则清除配置
             if (!isInstalled) {
-                mmkv.remove(key)
+                mmkv.remove(packageName)
                 removedCount++
-                Logger.info(TAG, "Removed stale config for uninstalled package: $key")
+                Logger.info(TAG, "Removed stale config for uninstalled package: $packageName")
                 return@forEach
             }
 
-            val json = mmkv.getString(key, null) ?: return@forEach
+            val json = mmkv.getString(packageName, null) ?: return@forEach
             runCatching {
                 val configList = GLOBAL_JSON.decodeFromString<RendererConfigList>(json)
-                rendererPluginList.add(
-                    RendererV2Plugin(packageName = key, config = configList)
-                )
+                // 获取插件应用名称
+                val appInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+                val appLabel = pm.getApplicationLabel(appInfo).toString()
+
+                // 已成功加载目标插件
+                runCatching {
+                    cacheAppIcon(context, appInfo)
+                    ApkPlugin(
+                        packageName = packageName,
+                        appName = appLabel,
+                        appVersion = pm.getPackageInfo(packageName, 0).versionName ?: ""
+                    )
+                }.getOrNull()?.let { loaded(it) }
+
+                packageNameList.add(packageName)
+
+                configList.data.forEach { data ->
+                    val renderer = RendererV2Data(
+                        packageName = packageName,
+                        summary = context.getString(R.string.settings_renderer_from_plugins, appLabel),
+                        renderer = data
+                    )
+                    rendererPluginList.add(renderer)
+                }
             }.onFailure {
-                Logger.error(TAG, "Failed to parse config for $key, removing.", it)
-                mmkv.remove(key)
+                Logger.error(TAG, "Failed to parse config for $packageName, removing.", it)
+                mmkv.remove(packageName)
                 removedCount++
             }
         }
@@ -76,9 +115,11 @@ object RendererV2PluginManager {
      * 反序列化插件配置 JSON 并导入
      */
     fun deserialize(context: Context, senderPackageName: String, configJson: String) {
+        val pm = context.packageManager
+
         // 包名是否对应已安装的应用
         val packageInfo = runCatching {
-            context.packageManager.getPackageInfo(senderPackageName, 0)
+            pm.getPackageInfo(senderPackageName, 0)
         }.getOrNull()
         if (packageInfo == null) {
             Logger.warning(TAG, "Verification failed: Package name $senderPackageName is not installed.")
@@ -87,7 +128,7 @@ object RendererV2PluginManager {
 
         // 验证是否声明了 fclPlugin_V2
         val appInfo = runCatching {
-            context.packageManager.getApplicationInfo(senderPackageName, PackageManager.GET_META_DATA)
+            pm.getApplicationInfo(senderPackageName, PackageManager.GET_META_DATA)
         }.getOrNull()
         val metaData = appInfo?.metaData
         if (metaData == null || !metaData.getBoolean("fclPlugin_V2", false)) {
@@ -105,18 +146,15 @@ object RendererV2PluginManager {
                 packageName = senderPackageName,
                 config = config
             )
-            addPlugin(plugin)
             save(plugin)
         }
     }
 
-    private fun addPlugin(plugin: RendererV2Plugin) {
-        val existingIndex = rendererPluginList.indexOfFirst { it.packageName == plugin.packageName }
-        if (existingIndex >= 0) {
-            rendererPluginList[existingIndex] = plugin
-        } else {
-            rendererPluginList.add(plugin)
-        }
+    /**
+     * 移除渲染器插件，并保存本地配置列表
+     */
+    fun removeRenderer(failedToLoadList: List<RendererV2Data>) {
+        TODO("Not yet implemented")
     }
 
     private fun save(plugin: RendererV2Plugin) {

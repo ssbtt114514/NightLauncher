@@ -18,14 +18,38 @@
 
 package com.movtery.zalithlauncher.game.plugin.renderer_v2
 
+import com.movtery.zalithlauncher.game.plugin.renderer_v2.data.RendererConfig
 import com.movtery.zalithlauncher.game.plugin.renderer_v2.data.RendererConfigList
+import com.movtery.zalithlauncher.game.renderer.RendererInterface
 
 /**
  * V2 渲染器插件预处理数据
  * @param packageName 插件包名
- * @param config 外部插件导入的渲染器配置
+ * @param config 外部插件导入的渲染器配置列表
  */
 class RendererV2Plugin(
     val packageName: String,
     val config: RendererConfigList
 )
+
+/**
+ * V2 渲染器插件项
+ * @param packageName 插件包名
+ * @param renderer 外部插件导入的渲染器配置
+ */
+data class RendererV2Data(
+    val packageName: String,
+    val summary: String,
+    val renderer: RendererConfig
+): RendererInterface {
+    override fun getRendererId(): String = renderer.rendererId
+    override fun getUniqueIdentifier(): String = "${packageName}_${renderer.renderSuffix}"
+    override fun getRendererName(): String = renderer.displayName
+    override fun getRendererSummary(): String = summary
+    override fun getMinMCVersion(): String? = renderer.minMCVer
+    override fun getMaxMCVersion(): String? = renderer.maxMCVer
+    override fun getRendererEnv(): Lazy<Map<String, String>> = lazy { renderer.env }
+    override fun getDlopenLibrary(): Lazy<List<String>> = lazy { renderer.dlopenLibPaths }
+    override fun getRendererLibrary(): String = renderer.rendererGLPath
+    override fun getRendererEGL(): String = renderer.rendererEGLPath
+}
