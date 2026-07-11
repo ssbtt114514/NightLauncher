@@ -50,7 +50,10 @@ import com.movtery.zalithlauncher.notification.NotificationManager
 import com.movtery.zalithlauncher.path.PathManager
 import com.movtery.zalithlauncher.path.URL_SUPPORT
 import com.movtery.zalithlauncher.setting.AllSettings
+import com.movtery.zalithlauncher.ui.AndroidStringText
+import com.movtery.zalithlauncher.ui.androidText
 import com.movtery.zalithlauncher.ui.base.BaseAppCompatActivity
+import com.movtery.zalithlauncher.ui.buildAppendedText
 import com.movtery.zalithlauncher.ui.components.SimpleAlertDialog
 import com.movtery.zalithlauncher.ui.screens.NestedNavKey
 import com.movtery.zalithlauncher.ui.screens.NormalNavKey
@@ -64,6 +67,7 @@ import com.movtery.zalithlauncher.ui.screens.main.crashlogs.ShareLinkOperation
 import com.movtery.zalithlauncher.ui.theme.ZalithLauncherTheme
 import com.movtery.zalithlauncher.ui.theme.feativals.FestivalEffects
 import com.movtery.zalithlauncher.ui.theme.showThemed
+import com.movtery.zalithlauncher.ui.toAndroidString
 import com.movtery.zalithlauncher.ui.vulkan_checker.VCOperation
 import com.movtery.zalithlauncher.ui.vulkan_checker.VulkanChecker
 import com.movtery.zalithlauncher.upgrade.TooFrequentOperationException
@@ -259,6 +263,13 @@ class MainActivity : BaseAppCompatActivity() {
                     is EventViewModel.Event.VulkanCheck -> {
                         checkVulkan()
                     }
+                    is EventViewModel.Event.ShowToast -> {
+                        Toast.makeText(
+                            this@MainActivity,
+                            event.text.toAndroidString(this@MainActivity),
+                            event.duration
+                        ).show()
+                    }
                     else -> {
                         //忽略
                     }
@@ -306,6 +317,7 @@ class MainActivity : BaseAppCompatActivity() {
                     //启动游戏操作流程
                     LaunchGameOperation(
                         activity = this@MainActivity,
+                        eventViewModel = eventViewModel,
                         launchGameOperation = launchGameViewModel.launchGameOperation,
                         updateOperation = { launchGameViewModel.updateOperation(it) },
                         exitActivity = {
@@ -652,8 +664,8 @@ class MainActivity : BaseAppCompatActivity() {
      */
     private fun importControlFiles(uris: List<Uri>) {
         fun showError(
-            title: String = getString(R.string.control_manage_import_failed),
-            message: String
+            title: AndroidStringText = androidText(R.string.control_manage_import_failed),
+            message: AndroidStringText
         ) {
             errorViewModel.showError(
                 ErrorViewModel.ThrowableMessage(
@@ -669,19 +681,22 @@ class MainActivity : BaseAppCompatActivity() {
                     var done = false
                     uris.forEach { uri ->
                         val inputStream = contentResolver.openInputStream(uri) ?: run {
-                            showError(message = getString(R.string.multirt_runtime_import_failed_input_stream))
+                            showError(message = androidText(R.string.multirt_runtime_import_failed_input_stream))
                             return@forEach
                         }
                         ControlManager.importControl(
                             inputStream = inputStream,
                             onSerializationError = {
                                 showError(
-                                    message = getString(R.string.control_manage_import_failed_to_parse) + "\n" +
-                                            it.getMessageOrToString()
+                                    message = buildAppendedText {
+                                        append(R.string.control_manage_import_failed_to_parse)
+                                        append("\n")
+                                        append(it.getMessageOrToString())
+                                    }
                                 )
                             },
                             catchedError =  {
-                                showError(message = it.getMessageOrToString())
+                                showError(message = androidText(it.getMessageOrToString()))
                             },
                             onFinished = {
                                 done = true

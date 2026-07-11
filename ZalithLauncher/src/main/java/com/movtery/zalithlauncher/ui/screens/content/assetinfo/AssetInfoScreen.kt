@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/gpl-3.0.txt>.
  */
 
-package com.movtery.zalithlauncher.ui.screens.content.download
+package com.movtery.zalithlauncher.ui.screens.content.assetinfo
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,13 +33,11 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.movtery.zalithlauncher.game.download.assets.downloadSingleForVersions
-import com.movtery.zalithlauncher.game.download.assets.platform.PlatformClasses
 import com.movtery.zalithlauncher.ui.screens.NestedNavKey
 import com.movtery.zalithlauncher.ui.screens.NormalNavKey
 import com.movtery.zalithlauncher.ui.screens.TitledNavKey
 import com.movtery.zalithlauncher.ui.screens.content.download.assets.download.DownloadAssetsScreen
 import com.movtery.zalithlauncher.ui.screens.content.download.assets.elements.DownloadSingleOperation
-import com.movtery.zalithlauncher.ui.screens.content.download.assets.search.SearchResourcePackScreen
 import com.movtery.zalithlauncher.ui.screens.navigateTo
 import com.movtery.zalithlauncher.ui.screens.onBack
 import com.movtery.zalithlauncher.ui.screens.rememberTransitionSpec
@@ -47,33 +45,34 @@ import com.movtery.zalithlauncher.utils.network.isUsingMobileData
 import com.movtery.zalithlauncher.viewmodel.ErrorViewModel
 import com.movtery.zalithlauncher.viewmodel.EventViewModel
 
+/**
+ * Addons资源信息屏幕 独立于下载页面的导航栈
+ */
 @Composable
-fun DownloadResourcePackScreen(
-    key: NestedNavKey.DownloadResourcePack,
+fun AssetInfoScreen(
+    key: NestedNavKey.AssetInfo,
     mainScreenKey: TitledNavKey?,
-    downloadScreenKey: TitledNavKey?,
-    downloadResourcePackScreenKey: TitledNavKey?,
-    onCurrentKeyChange: (TitledNavKey?) -> Unit,
+    assetInfoScreenKey: TitledNavKey?,
+    eventViewModel: EventViewModel,
     submitError: (ErrorViewModel.ThrowableMessage) -> Unit,
-    eventViewModel: EventViewModel
 ) {
     val backStack = key.backStack
     val stackTopKey = backStack.lastOrNull()
     LaunchedEffect(stackTopKey) {
-        onCurrentKeyChange(stackTopKey)
+        key.currentKey = stackTopKey
     }
 
     val context = LocalContext.current
 
-    //下载资源操作
+    // 下载资源操作
     var operation by remember { mutableStateOf<DownloadSingleOperation>(DownloadSingleOperation.None) }
     DownloadSingleOperation(
         operation = operation,
         changeOperation = { operation = it },
-        doInstall = { classes, version, versions ->
+        doInstall = { classes, version, gameVersions ->
             downloadSingleForVersions(
                 version = version,
-                versions = versions,
+                versions = gameVersions,
                 folder = classes.versionFolder.folderName,
                 submitError = submitError
             )
@@ -99,24 +98,12 @@ fun DownloadResourcePackScreen(
             transitionSpec = rememberTransitionSpec(),
             popTransitionSpec = rememberTransitionSpec(),
             entryProvider = entryProvider {
-                entry<NormalNavKey.SearchResourcePack> {
-                    SearchResourcePackScreen(
-                        mainScreenKey = mainScreenKey,
-                        downloadScreenKey = downloadScreenKey,
-                        downloadResourcePackScreenKey = key,
-                        downloadResourcePackScreenCurrentKey = downloadResourcePackScreenKey
-                    ) { platform, projectId, _ ->
-                        backStack.navigateTo(
-                            NormalNavKey.DownloadAssets(platform, projectId, PlatformClasses.RESOURCE_PACK)
-                        )
-                    }
-                }
                 entry<NormalNavKey.DownloadAssets> { assetsKey ->
                     DownloadAssetsScreen(
                         mainScreenKey = mainScreenKey,
                         parentScreenKey = key,
-                        parentCurrentKey = downloadScreenKey,
-                        currentKey = downloadResourcePackScreenKey,
+                        parentCurrentKey = mainScreenKey,
+                        currentKey = assetInfoScreenKey,
                         key = assetsKey,
                         eventViewModel = eventViewModel,
                         onItemClicked = { classes, version, _, deps ->
@@ -125,7 +112,10 @@ fun DownloadResourcePackScreen(
                             } else {
                                 DownloadSingleOperation.SelectVersion(classes, version, deps)
                             }
-                        }
+                        },
+                        nestedNavKeyClass = NestedNavKey.AssetInfo::class.java,
+                        versionsUIWeight = 7f,
+                        projectUIWeight = 3f,
                     )
                 }
             }

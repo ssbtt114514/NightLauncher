@@ -52,6 +52,8 @@ import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.setting.enums.GestureActionType
 import com.movtery.zalithlauncher.setting.enums.MouseControlMode
 import com.movtery.zalithlauncher.setting.unit.floatRange
+import com.movtery.zalithlauncher.ui.AndroidStringText
+import com.movtery.zalithlauncher.ui.androidText
 import com.movtery.zalithlauncher.ui.components.DualMenuSubscreen
 import com.movtery.zalithlauncher.ui.components.MenuListLayout
 import com.movtery.zalithlauncher.ui.components.MenuSliderLayout
@@ -97,7 +99,8 @@ fun GameMenuSubscreen(
     onSendKeycode: () -> Unit,
     onReplacementControl: () -> Unit,
     onManageJoystick: () -> Unit,
-    onEditLayout: () -> Unit
+    onEditLayout: () -> Unit,
+    onShowToast: (AndroidStringText, Int) -> Unit
 ) {
     DualMenuSubscreen(
         state = state,
@@ -178,7 +181,8 @@ fun GameMenuSubscreen(
                 onSwitchLog = onSwitchLog,
                 enableTerracotta = enableTerracotta,
                 onOpenTerracottaMenu = onOpenTerracottaMenu,
-                onRefreshWindowSize = onRefreshWindowSize
+                onRefreshWindowSize = onRefreshWindowSize,
+                onShowToast = onShowToast
             )
         }
     )
@@ -191,13 +195,11 @@ private fun GameActionContent(
     enableTerracotta: Boolean,
     onOpenTerracottaMenu: () -> Unit,
     onRefreshWindowSize: () -> Unit,
+    onShowToast: (AndroidStringText, Int) -> Unit,
     modifier: Modifier = Modifier,
     color: Color = cardColor(false),
     contentColor: Color = onCardColor(),
 ) {
-    //检查陀螺仪是否可用
-    val context = LocalContext.current
-
     val listState = rememberLazyListState()
     LazyColumn(
         modifier = modifier.lazyScrollWithBar(listState),
@@ -257,11 +259,10 @@ private fun GameActionContent(
                 onSwitch = { value ->
                     AllSettings.showMenuBall.save(value)
                     if (!value) {
-                        Toast.makeText(
-                            context,
-                            context.getString(R.string.game_menu_option_show_menu_hided),
+                        onShowToast(
+                            androidText(R.string.game_menu_option_show_menu_hided),
                             Toast.LENGTH_LONG
-                        ).show()
+                        )
                     }
                 },
                 color = color,
