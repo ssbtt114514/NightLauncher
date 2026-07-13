@@ -18,32 +18,23 @@
 
 package com.movtery.zalithlauncher.ui.base
 
-import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.CallSuper
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.captionBarPadding
-import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.LaunchedEffect
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 abstract class FullScreenAppCompatActivity : AbstractAppCompatActivity() {
-    private val _isMultiWindowMode = MutableStateFlow(false)
-    val isMultiWindowMode = _isMultiWindowMode.asStateFlow()
+    /**
+     * @return 决定是否启用全屏模式
+     */
+    open fun isFullScreen(): Boolean = false
 
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,22 +56,28 @@ abstract class FullScreenAppCompatActivity : AbstractAppCompatActivity() {
         }
     }
 
-    override fun onMultiWindowModeChanged(isInMultiWindowMode: Boolean, newConfig: Configuration) {
-        super.onMultiWindowModeChanged(isInMultiWindowMode, newConfig)
-        _isMultiWindowMode.value = isInMultiWindowMode
+    @Suppress("DEPRECATION")
+    fun setDisplayCutoutMode(fullScreen: Boolean) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            window?.let { window ->
+                val params = window.attributes
+                val newMode = if (fullScreen) {
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+                } else {
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+                }
+                if (params.layoutInDisplayCutoutMode != newMode) {
+                    params.layoutInDisplayCutoutMode = newMode
+                    window.attributes = params
+                }
+            }
+        }
     }
 
     @Suppress("DEPRECATION")
     private fun applyFullImmersive() {
         window?.let { window ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                val params = window.attributes
-                val newParams = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-                if (params.layoutInDisplayCutoutMode != newParams) {
-                    params.layoutInDisplayCutoutMode = newParams
-                    window.attributes = params
-                }
-            }
+            setDisplayCutoutMode(isFullScreen())
 
             WindowCompat.setDecorFitsSystemWindows(window, false)
             WindowCompat.getInsetsController(window, window.decorView).apply {
@@ -97,21 +94,13 @@ abstract class FullScreenAppCompatActivity : AbstractAppCompatActivity() {
     }
 }
 
+/**
+ * 实时监听全屏设置变化并更新刘海屏模式
+ */
 @Composable
-fun Modifier.applyFullscreen(value: Boolean): Modifier {
-    val isInMultiWindowMode by isInMultiWindowMode()
-
-    val modifier = Modifier
-        .fillMaxSize()
-        .captionBarPadding()
-    return then(
-        if (value || isInMultiWindowMode) modifier
-        else modifier.windowInsetsPadding(WindowInsets.displayCutout)
-    )
-}
-
-@Composable
-private fun isInMultiWindowMode(): State<Boolean> {
-    val activity = LocalActivity.current as FullScreenAppCompatActivity
-    return activity.isMultiWindowMode.collectAsStateWithLifecycle()
+fun ObserveFullScreenSetting(fullScreen: Boolean) {
+    val activity = LocalActivity.current as? FullScreenAppCompatActivity ?: return
+    LaunchedEffect(fullScreen) {
+        activity.setDisplayCutoutMode(fullScreen)
+    }
 }
