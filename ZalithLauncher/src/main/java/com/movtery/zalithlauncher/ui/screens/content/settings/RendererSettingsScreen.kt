@@ -86,8 +86,6 @@ fun RendererSettingsScreen(
         Triple(key, mainScreenKey, false),
         Triple(NormalNavKey.Settings.Renderer, settingsScreenKey, false)
     ) { isVisible ->
-        val context = LocalContext.current
-
         AnimatedColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -105,7 +103,7 @@ fun RendererSettingsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         position = CardPosition.Top,
                         unit = AllSettings.renderer,
-                        items = Renderers.getCompatibleRenderers(context).second,
+                        items = Renderers.getRenderers(),
                         title = stringResource(R.string.settings_renderer_global_renderer_title),
                         summary = stringResource(R.string.settings_renderer_global_renderer_summary),
                         getItemText = { it.getRendererName() },
@@ -137,7 +135,7 @@ fun RendererSettingsScreen(
 
                     val currentRendererId = AllSettings.renderer.state
                     val v2PluginEnvUnits = remember(currentRendererId) {
-                        Renderers.getCompatibleRenderers(context).second
+                        Renderers.getRenderers()
                             .filterIsInstance<RendererV2Data>()
                             .find { it.getUniqueIdentifier() == currentRendererId }
                             ?.env?.getConfigurableUnits()?.takeIf { it.isNotEmpty() }
