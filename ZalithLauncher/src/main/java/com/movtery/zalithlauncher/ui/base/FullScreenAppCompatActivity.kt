@@ -47,6 +47,11 @@ abstract class FullScreenAppCompatActivity : AbstractAppCompatActivity() {
         applyFullscreen()
     }
 
+    /**
+     * 全屏/忽略前置摄像头区域的代码实现参考了 [Amethyst-Android](https://github.com/AngelAuraMC/Amethyst-Android/blob/9c83fc6/app_pojavlauncher/src/main/java/net/kdt/pojavlaunch/BaseActivity.java)
+     *
+     * 注：targetSdk 需要设置为 34，从 35 开始，Activity 会被强行加入 enableEdgeToEdge，该实现就会彻底失效
+     */
     fun applyFullscreen() {
         val decorView = window.decorView
         val visibilityChangeListener = OnSystemUiVisibilityChangeListener { visibility: Int ->
