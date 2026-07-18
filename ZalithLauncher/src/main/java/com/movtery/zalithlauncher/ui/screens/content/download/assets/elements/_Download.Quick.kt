@@ -172,12 +172,14 @@ private class QuickDownloadViewModel(
 
             val versions = getVersions(currentProjectId, currentPlatform)
                 .filter { isVersionCompatible(it) }
+                .initAllGeneric(currentProjectId = currentProjectId)
 
             if (versions.isEmpty()) {
                 error("No compatible version for project ${project.platformTitle()}")
             }
 
-            val latestVersion = versions.maxByOrNull { it.platformDatePublished() } ?: versions.first()
+            //initAllGeneric 已按发布日期降序排序，取第一个即为最新版本
+            val latestVersion = versions.first()
 
             val requiredDeps = latestVersion.platformDependencies()
                 .filter { it.type == PlatformDependencyType.REQUIRED && it.projectId.isNotEmpty() }
