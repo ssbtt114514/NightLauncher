@@ -23,8 +23,26 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: ["all", "arm", "arm64", "x86", "x86_64"]
-        nojre: [false, true]
+        # 含 JRE 的全架构 + 各具体架构；无 JRE 版本只构建具体架构（不构建 all-nojre）
+        include:
+          - arch: "all"
+            nojre: false
+          - arch: "arm"
+            nojre: false
+          - arch: "arm64"
+            nojre: false
+          - arch: "x86"
+            nojre: false
+          - arch: "x86_64"
+            nojre: false
+          - arch: "arm"
+            nojre: true
+          - arch: "arm64"
+            nojre: true
+          - arch: "x86"
+            nojre: true
+          - arch: "x86_64"
+            nojre: true
       fail-fast: false
 
     env:
