@@ -23,7 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: ["all", "arm", "arm64", "x86", "x86_64", "all-nojre"]
+        arch: ["all", "arm", "arm64", "x86", "x86_64"]
+        nojre: [false, true]
       fail-fast: false
 
     env:
@@ -49,31 +50,33 @@ jobs:
         with:
           add-job-summary: "on-failure"
 
-      - name: Build APK for ${{ matrix.arch }}
+      - name: Build APK for ${{ matrix.arch }}${{ matrix.nojre == true && '-nojre' || '' }}
+        env:
+          ARCH_ARG: ${{ matrix.arch }}${{ matrix.nojre == true && '-nojre' || '' }}
         run: |
           chmod +x gradlew
-          ./gradlew ZalithLauncher:assemble${{ inputs.variant }} -Darch=${{ matrix.arch }}
+          ./gradlew ZalithLauncher:assemble${{ inputs.variant }} -Darch="$ARCH_ARG"
 
-      - name: Upload Release APK for ${{ matrix.arch }}
+      - name: Upload Release APK for ${{ matrix.arch }}${{ matrix.nojre == true && '-nojre' || '' }}
         if: inputs.variant == 'Release'
         continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
-          name: release apk (${{ matrix.arch }})
+          name: release apk (${{ matrix.arch }}${{ matrix.nojre == true && '-nojre' || '' }})
           path: ZalithLauncher/build/outputs/apk/release/*.apk
 
-      - name: Upload Release Mapping for ${{ matrix.arch }}
+      - name: Upload Release Mapping for ${{ matrix.arch }}${{ matrix.nojre == true && '-nojre' || '' }}
         if: inputs.variant == 'Release'
         continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
-          name: mapping (${{ matrix.arch }})
+          name: mapping (${{ matrix.arch }}${{ matrix.nojre == true && '-nojre' || '' }})
           path: ZalithLauncher/build/outputs/mapping/release/mapping.txt
 
-      - name: Upload Debug APK for ${{ matrix.arch }}
+      - name: Upload Debug APK for ${{ matrix.arch }}${{ matrix.nojre == true && '-nojre' || '' }}
         if: inputs.variant == 'Debug'
         continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
-          name: debug apk (${{ matrix.arch }})
+          name: debug apk (${{ matrix.arch }}${{ matrix.nojre == true && '-nojre' || '' }})
           path: ZalithLauncher/build/outputs/apk/debug/*.apk
