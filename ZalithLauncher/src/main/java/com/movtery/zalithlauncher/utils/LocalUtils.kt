@@ -453,7 +453,7 @@ fun printLauncherInfo(
     println("▷ Device: ${Build.PRODUCT} ${Build.MODEL}")
     println("▷ Arch: ${Architecture.archAsString(Architecture.getDeviceArchitecture())}")
     println("▷ Android Version: ${Build.VERSION.RELEASE}")
-    println("▷ Launcher Version: ${BuildConfig.VERSION_NAME}, build: ${BuildKeys.BUILD_ARCH}")
+    println("▷ Launcher Version: ${BuildConfig.VERSION_NAME}, build: ${BuildKeys.BUILD_ARCH}${if (BuildKeys.BUILD_NO_JRE.toBoolean()) ", no JRE" else ""}")
 }
 
 /**

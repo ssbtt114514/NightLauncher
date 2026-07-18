@@ -27,7 +27,11 @@ val defaultStorePassword = project.findProperty("default_store_password") as? St
 val defaultKeyPassword = project.findProperty("default_key_password") as? String ?: error("The \"default_key_password\" property is not set in gradle.properties.")
 val defaultCurseForgeApiKey = project.findProperty("curseforge_api_key") as? String
 
-val projectArch: String = System.getProperty("arch", "all")
+val projectArchRaw: String = System.getProperty("arch", "all")
+/** 是否构建无 Java 运行时（JRE）的版本 */
+val noJRE: Boolean = projectArchRaw.endsWith("-nojre")
+/** 实际的目标架构（去除 -nojre 后缀） */
+val projectArch: String = if (noJRE) projectArchRaw.removeSuffix("-nojre") else projectArchRaw
 
 fun getKeyFromLocal(envKey: String, fileName: String? = null, default: String? = null): String {
     val key = System.getenv(envKey)
@@ -143,13 +147,18 @@ androidComponents {
                         val assetsDir = task.outputDir.get().asFile
                         val jreList = listOf("jre-8", "jre-17", "jre-21", "jre-25")
                         val tag = "JREAssetsCleanup"
-                        logger.lifecycle("[$tag] arch: $projectArch")
+                        logger.lifecycle("[$tag] arch: $projectArch, noJRE: $noJRE")
                         jreList.forEach { jreVersion ->
                             val runtimeDir = File("$assetsDir/runtimes/$jreVersion")
                             logger.lifecycle("[$tag] runtimeDir: ${runtimeDir.absolutePath}")
-                            runtimeDir.listFiles()?.forEach {
-                                if (projectArch != "all" && it.name != "version" && !it.name.contains("universal") && it.name != "bin-$projectArch.tar.xz") {
-                                    logger.lifecycle("[$tag] delete: $it : ${it.delete()}")
+                            if (noJRE) {
+                                //无 JRE 版本：删除整个 JRE 目录
+                                logger.lifecycle("[$tag] noJRE=true, delete runtimeDir: ${runtimeDir.deleteRecursively()}")
+                            } else {
+                                runtimeDir.listFiles()?.forEach {
+                                    if (projectArch != "all" && it.name != "version" && !it.name.contains("universal") && it.name != "bin-$projectArch.tar.xz") {
+                                        logger.lifecycle("[$tag] delete: $it : ${it.delete()}")
+                                    }
                                 }
                             }
                         }
@@ -158,7 +167,8 @@ androidComponents {
 
                 (output.getFilter(ABI)?.identifier ?: "all").let { abi ->
                     val baseName = "$launcherName-${if (variant.buildType == "release") launcherVersionName else "Debug-$launcherVersionName"}"
-                    output.outputFileName = if (abi == "all") "$baseName.apk" else "$baseName-$abi.apk"
+                    val noJRESuffix = if (noJRE) "-nojre" else ""
+                    output.outputFileName = if (abi == "all") "$baseName$noJRESuffix.apk" else "$baseName-$abi$noJRESuffix.apk"
                 }
             }
         }
@@ -183,6 +193,7 @@ buildKeys {
     string("URL_HOME", launcherUrl, true)
     string("CURSEFORGE_API", getKeyFromLocal("CURSEFORGE_API_KEY", ".curseforge_api.txt", defaultCurseForgeApiKey), true)
     string("BUILD_ARCH", projectArch)
+    string("BUILD_NO_JRE", noJRE.toString())
 }
 
 dependencies {
