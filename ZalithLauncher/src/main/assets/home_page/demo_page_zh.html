@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Zalith Launcher 2 - 功能展示</title>
+    <style>
+        :root {
+            --bg: #f5f5f7;
+            --card-bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666666;
+            --accent: #6750a4;
+            --accent-light: #e8def8;
+            --accent-text: #ffffff;
+            --border: #e0e0e0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-hover: 0 4px 16px rgba(103,80,164,0.2);
+            --success: #2e7d32;
+            --warning: #f57c00;
+            --error: #c62828;
+        }
+        html.dark {
+            --bg: #1c1b1f;
+            --card-bg: #2b2930;
+            --text: #e6e1e5;
+            --text-secondary: #cac4d0;
+            --accent: #d0bcff;
+            --accent-light: #4f378b;
+            --accent-text: #381e72;
+            --border: #49454f;
+            --shadow: 0 2px 8px rgba(0,0,0,0.3);
+            --shadow-hover: 0 4px 16px rgba(208,188,255,0.25);
+            --success: #66bb6a;
+            --warning: #ffa726;
+            --error: #ef9a9a;
+        }
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+        }
+        html, body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, "Roboto", "Noto Sans CJK SC", "PingFang SC", sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+            -webkit-text-size-adjust: 100%;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px 16px 40px;
+        }
+
+        /* Hero Header */
+        .hero {
+            text-align: center;
+            padding: 30px 20px 20px;
+            background: linear-gradient(135deg, var(--accent) 0%, #8b72c9 100%);
+            border-radius: 24px;
+            color: var(--accent-text);
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        html.dark .hero {
+            background: linear-gradient(135deg, var(--accent-light) 0%, #381e72 100%);
+        }
+        .hero h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .hero .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 16px;
+        }
+        .hero .version-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: var(--accent-text);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            backdrop-filter: blur(4px);
+        }
+        html.dark .hero .version-badge {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 24px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text);
+        }
+        .section-title .icon {
+            font-size: 20px;
+        }
+
+        /* Launch Button */
+        .launch-section {
+            margin-bottom: 24px;
+        }
+        .launch-btn {
+            width: 100%;
+            padding: 16px 24px;
+            font-size: 17px;
+            font-weight: 600;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--accent) 0%, #8b72c9 100%);
+            color: var(--accent-text);
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.2s;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        html.dark .launch-btn {
+            background: linear-gradient(135deg, var(--accent-light) 0%, #381e72 100%);
+        }
+        .launch-btn:active {
+            transform: scale(0.98);
+        }
+        .launch-btn .play-icon {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .quick-btn {
+            padding: 14px 12px;
+            border-radius: 14px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: var(--shadow);
+        }
+        .quick-btn:active {
+            transform: scale(0.97);
+            box-shadow: var(--shadow-hover);
+        }
+        .quick-btn .emoji {
+            font-size: 18px;
+        }
+
+        /* Feature Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .feature-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px 14px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .feature-card:active {
+            transform: scale(0.97);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--accent);
+        }
+        .feature-card .icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .feature-card .title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text);
+        }
+        .feature-card .desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* Info Card */
+        .info-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: var(--shadow);
+            margin-bottom: 12px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .info-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .info-row:first-child {
+            padding-top: 0;
+        }
+        .info-row .label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .info-row .value {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 14px 10px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+        .stat-card .num {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+        .stat-card .label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tool-btn {
+            padding: 10px 14px;
+            border-radius: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            min-width: 100px;
+            justify-content: center;
+        }
+        .tool-btn:active {
+            background: var(--accent-light);
+            border-color: var(--accent);
+        }
+
+        /* Links section */
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .link-btn {
+            padding: 12px;
+            border-radius: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            text-align: left;
+        }
+        .link-btn:active {
+            background: var(--accent-light);
+        }
+        .link-btn .ico {
+            font-size: 18px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 24px 0 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .footer .theme-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 10px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            margin-top: 8px;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <!-- Hero Header -->
+        <div class="hero">
+            <h1>🎮 Zalith Launcher 2</h1>
+            <div class="subtitle">基于 Fabric 的 Minecraft 启动器 · 安卓平台</div>
+            <span class="version-badge">✨ v2.0 功能展示主页</span>
+        </div>
+
+        <!-- 一键启动 -->
+        <div class="launch-section">
+            <button class="launch-btn" onclick="launchGame()">
+                <svg class="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                启动游戏
+            </button>
+        </div>
+
+        <!-- 快捷操作 -->
+        <div class="section">
+            <div class="section-title">
+                <span class="icon">⚡</span>
+                快捷操作
+            </div>
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="checkUpdate()">
+                    <span class="emoji">🔔</span>
+                    检查更新
+                </button>
+                <button class="quick-btn" onclick="shareLog()">
+                    <span class="emoji">📤</span>
+                    分享日志
+                </button>
+                <button class="quick-btn" onclick="copyToClipboard()">
+                    <span class="emoji">📋</span>
+                    复制版本信息
+                </button>
+                <button class="quick-btn" onclick="refreshPage()">
+                    <span class="emoji">🔄</span>
+                    刷新主页
+                </button>
+            </div>
+        </div>
+
+        <!-- 核心功能 -->
+        <div class="section">
+            <div class="section-title">
+                <span class="icon">🎯</span>
+                核心功能
+            </div>
+            <div class="feature-grid">
+                <div class="feature-card" onclick="showToast('版本管理')">
+                    <span class="icon">📦</span>
+                    <div class="title">版本管理</div>
+                    <div class="desc">下载安装 Minecraft 版本，切换 Forge/Fabric/Quilt</div>
+                </div>
+                <div class="feature-card" onclick="showToast('账号管理')">
+                    <span class="icon">👤</span>
+                    <div class="title">账号管理</div>
+                    <div class="desc">微软账号登录，支持多账号切换</div>
+                </div>
+                <div class="feature-card" onclick="showToast('Mod 管理')">
+                    <span class="icon">🧩</span>
+                    <div class="title">Mod 管理</div>
+                    <div class="desc">一键安装/禁用模组，支持 Modrinth 下载</div>
+                </div>
+                <div class="feature-card" onclick="showToast('多人联机')">
+                    <span class="icon">🌐</span>
+                    <div class="title">多人联机</div>
+                    <div class="desc">Terracotta 局域网联机，与好友一起玩</div>
+                </div>
+                <div class="feature-card" onclick="showToast('设置管理')">
+                    <span class="icon">⚙️</span>
+                    <div class="title">设置中心</div>
+                    <div class="desc">游戏设置、控制设置、启动器设置</div>
+                </div>
+                <div class="feature-card" onclick="showToast('Java 管理')">
+                    <span class="icon">☕</span>
+                    <div class="title">Java 管理</div>
+                    <div class="desc">管理 Java 运行环境，自动下载</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 版本信息 -->
+        <div class="section">
+            <div class="section-title">
+                <span class="icon">📊</span>
+                版本信息
+            </div>
+            <div class="info-card">
+                <div class="info-row">
+                    <span class="label">当前版本</span>
+                    <span class="value" id="current-version">未检测</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">模组加载器</span>
+                    <span class="value" id="current-loader">—</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">当前账号</span>
+                    <span class="value" id="current-account">—</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">运行模式</span>
+                    <span class="value">Release</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据统计 -->
+        <div class="section">
+            <div class="section-title">
+                <span class="icon">📈</span>
+                数据统计
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="num">1</div>
+                    <div class="label">游戏版本</div>
+                </div>
+                <div class="stat-card">
+                    <div class="num">0</div>
+                    <div class="label">已装 Mod</div>
+                </div>
+                <div class="stat-card">
+                    <div class="num">0</div>
+                    <div class="label">世界存档</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 内容管理 -->
+        <div class="section">
+            <div class="section-title">
+                <span class="icon">📁</span>
+                内容管理
+            </div>
+            <div class="feature-grid">
+                <div class="feature-card" onclick="showToast('存档管理')">
+                    <span class="icon">🗺️</span>
+                    <div class="title">存档管理</div>
+                    <div class="desc">管理游戏存档，导入导出</div>
+                </div>
+                <div class="feature-card" onclick="showToast('资源包')">
+                    <span class="icon">🎨</span>
+                    <div class="title">资源包</div>
+                    <div class="desc">管理材质包，美化游戏界面</div>
+                </div>
+                <div class="feature-card" onclick="showToast('光影包')">
+                    <span class="icon">✨</span>
+                    <div class="title">光影包</div>
+                    <div class="desc">配置光影效果，提升画面</div>
+                </div>
+                <div class="feature-card" onclick="showToast('服务器列表')">
+                    <span class="icon">🌍</span>
+                    <div class="title">服务器列表</div>
+                    <div class="desc">管理多人服务器</div>
+                </div>
+                <div class="feature-card" onclick="showToast('截屏管理')">
+                    <span class="icon">🖼️</span>
+                    <div class="title">截屏管理</div>
+                    <div class="desc">浏览游戏截图</div>
+                </div>
+                <div class="feature-card" onclick="showToast('整合包')">
+                    <span class="icon">📦</span>
+                    <div class="title">整合包</div>
+                    <div class="desc">导入导出 CurseForge/Modrinth 整合包</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 工具 -->
+        <div class="section">
+            <div class="section-title">
+                <span class="icon">🛠️</span>
+                工具
+            </div>
+            <div class="toolbar">
+                <button class="tool-btn" onclick="showToast('控制布局')">
+                    🎯 控制布局
+                </button>
+                <button class="tool-btn" onclick="showToast('日志查看')">
+                    📝 日志查看
+                </button>
+                <button class="tool-btn" onclick="showToast('文件选择')">
+                    📂 文件选择
+                </button>
+                <button class="tool-btn" onclick="showToast('搜索模组')">
+                    🔍 搜索模组
+                </button>
+            </div>
+        </div>
+
+        <!-- 常用链接 -->
+        <div class="section">
+            <div class="section-title">
+                <span class="icon">🔗</span>
+                常用链接
+            </div>
+            <div class="links-grid">
+                <button class="link-btn" onclick="openUrl('https://www.mcbbs.net/')">
+                    <span class="ico">💎</span>
+                    MCBBS
+                </button>
+                <button class="link-btn" onclick="openUrl('https://www.minebbs.com/')">
+                    <span class="ico">🏮</span>
+                    MineBBS
+                </button>
+                <button class="link-btn" onclick="openUrl('https://modrinth.com/')">
+                    <span class="ico">🔷</span>
+                    Modrinth
+                </button>
+                <button class="link-btn" onclick="openUrl('https://www.curseforge.com/')">
+                    <span class="ico">🔶</span>
+                    CurseForge
+                </button>
+                <button class="link-btn" onclick="openUrl('https://minecraft.fandom.com/')">
+                    <span class="ico">📖</span>
+                    MC Wiki
+                </button>
+                <button class="link-btn" onclick="openUrl('https://www.bilibili.com/')">
+                    <span class="ico">📺</span>
+                    哔哩哔哩
+                </button>
+            </div>
+        </div>
+
+        <!-- 设置项 -->
+        <div class="section">
+            <div class="section-title">
+                <span class="icon">🎨</span>
+                主题与语言
+            </div>
+            <div class="info-card">
+                <div class="info-row">
+                    <span class="label">当前主题</span>
+                    <span class="value" id="theme-label">检测中...</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">当前语言</span>
+                    <span class="value" id="lang-label">检测中...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部 -->
+        <div class="footer">
+            <div>Zalith Launcher 2 自定义主页演示</div>
+            <div class="theme-tag" id="bottom-tag">HTML + CSS + JavaScript</div>
+        </div>
+    </div>
+
+    <script>
+        // ============ 初始化 ============
+        function init() {
+            updateThemeLabel();
+            updateLangLabel();
+            updateVersionInfo();
+        }
+
+        // ============ 主题/语言 ============
+        function updateThemeLabel() {
+            var isDark = document.documentElement.classList.contains('dark');
+            document.getElementById('theme-label').textContent = isDark ? '🌙 深色模式' : '☀️ 浅色模式';
+        }
+        function updateLangLabel() {
+            var lang = document.documentElement.getAttribute('lang') || 'zh';
+            var langMap = {
+                'zh': '🇨🇳 简体中文',
+                'en': '🇺🇸 English',
+                'ja': '🇯🇵 日本語',
+                'ko': '🇰🇷 한국어',
+                'ru': '🇷🇺 Русский',
+                'tr': '🇹🇷 Türkçe',
+                'vi': '🇻🇳 Tiếng Việt',
+                'in': '🇮🇩 Bahasa',
+                'pt': '🇧🇷 Português',
+                'it': '🇮🇹 Italiano',
+                'es': '🇪🇸 Español',
+                'th': '🇹🇭 ไทย',
+                'fil': '🇵🇭 Filipino',
+                'ar': '🇸🇦 العربية'
+            };
+            document.getElementById('lang-label').textContent = langMap[lang] || ('🌐 ' + lang);
+        }
+
+        // 监听主题变化
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.attributeName === 'class') {
+                    updateThemeLabel();
+                }
+                if (mutation.attributeName === 'lang') {
+                    updateLangLabel();
+                }
+            });
+        });
+        observer.observe(document.documentElement, { attributes: true });
+
+        // ============ 版本信息模拟 ============
+        function updateVersionInfo() {
+            // 实际使用时可通过 JS 桥从启动器获取
+            document.getElementById('current-version').textContent = '1.21.1';
+            document.getElementById('current-loader').textContent = 'Fabric 0.102.1';
+            document.getElementById('current-account').textContent = '玩家';
+        }
+
+        // ============ 事件触发 ============
+        function sendEvent(key, data) {
+            if (window.ZalithLauncher && typeof ZalithLauncher.sendEvent === 'function') {
+                ZalithLauncher.sendEvent(key, data || null);
+            } else {
+                showToast('【演示模式】sendEvent(' + key + ', ' + (data || 'null') + ')');
+            }
+        }
+
+        function launchGame() {
+            sendEvent('launch_game');
+        }
+        function checkUpdate() {
+            sendEvent('check_update');
+        }
+        function shareLog() {
+            sendEvent('share_game_log');
+        }
+        function copyToClipboard() {
+            sendEvent('copy', 'Zalith Launcher 2 - Minecraft 启动器');
+        }
+        function refreshPage() {
+            sendEvent('refresh_page');
+        }
+        function openUrl(url) {
+            sendEvent('url', url);
+        }
+
+        // ============ 提示 ============
+        var toastTimer = null;
+        function showToast(msg) {
+            var toast = document.getElementById('__toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = '__toast';
+                toast.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:rgba(0,0,0,0.8);color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;z-index:9999;transition:transform 0.3s;pointer-events:none;white-space:nowrap;';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = msg;
+            toast.style.transform = 'translateX(-50%) translateY(0)';
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(function() {
+                toast.style.transform = 'translateX(-50%) translateY(100px)';
+            }, 1800);
+        }
+
+        init();
+    </script>
+</body>
+</html>
