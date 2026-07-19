@@ -182,6 +182,9 @@
     <string name="download_quick_download_no_versions">該資源沒有可用的版本</string>
     <string name="download_quick_download_no_mc_version">當前實例版本為 %1$s，該資源僅支援：%2$s</string>
     <string name="download_quick_download_no_loader">當前實例載入器為 %1$s，該資源僅支援：%2$s</string>
+    <string name="download_quick_download_shader_suggest_iris">未檢測到 Iris/Oculus/OptiFine，建議安裝 Iris 模組以獲得光影效果</string>
+    <string name="download_quick_download_shader_suggest_oculus">未檢測到 Iris/Oculus/OptiFine，建議安裝 Oculus 模組以獲得光影效果</string>
+    <string name="download_quick_download_shader_suggest_optifine">未檢測到 Iris/Oculus/OptiFine，建議使用 OptiFine 用戶端以獲得光影效果</string>
     <string name="download_game_failed_to_get_versions">獲取版本失敗：%s，點擊重試。</string>
     <string name="download_game_type_release">正式版</string>
     <string name="download_game_type_snapshot">快照版</string>

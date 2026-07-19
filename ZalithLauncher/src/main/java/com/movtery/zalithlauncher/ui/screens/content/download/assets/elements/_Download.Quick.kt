@@ -58,6 +58,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.movtery.zalithlauncher.R
+import com.movtery.zalithlauncher.game.addons.modloader.ModLoader
 import com.movtery.zalithlauncher.game.download.assets.platform.Platform
 import com.movtery.zalithlauncher.game.download.assets.platform.PlatformClasses
 import com.movtery.zalithlauncher.game.download.assets.platform.PlatformDependencyType
@@ -66,7 +67,9 @@ import com.movtery.zalithlauncher.game.download.assets.platform.PlatformVersion
 import com.movtery.zalithlauncher.game.download.assets.platform.getProjectByVersion
 import com.movtery.zalithlauncher.game.download.assets.platform.getVersions
 import com.movtery.zalithlauncher.game.version.installed.Version
+import com.movtery.zalithlauncher.game.version.installed.VersionFolders
 import com.movtery.zalithlauncher.game.version.installed.VersionsManager
+import com.movtery.zalithlauncher.game.version.mod.AllModReader
 import com.movtery.zalithlauncher.ui.components.MarqueeText
 import com.movtery.zalithlauncher.ui.components.ScalingLabel
 import com.movtery.zalithlauncher.ui.theme.cardColor
@@ -100,7 +103,9 @@ sealed interface QuickDownloadState {
     data class Ready(
         val targetProject: PlatformProject,
         val targetVersion: PlatformVersion,
-        val dependencies: List<Pair<PlatformProject, PlatformVersion>>
+        val dependencies: List<Pair<PlatformProject, PlatformVersion>>,
+        /** 光影包着色器模组警告（仅 SHADERS 类型），非空时需要提醒玩家 */
+        val shaderWarning: String? = null
     ) : QuickDownloadState
     /**
      * 解析失败：主资源或某个前置依赖缺少对应的 MC 版本或加载器版本。
@@ -123,6 +128,9 @@ data class CompatibilityFailure(
     val projectId: String,
     val reason: String
 )
+
+/** 着色器模组检测结果缓存，key = 实例游戏目录路径，防止重复检测 */
+private val shaderCheckCache = mutableMapOf<String, Boolean>()
 
 private class QuickDownloadViewModel(
     private val platform: Platform,
@@ -162,34 +170,21 @@ private class QuickDownloadViewModel(
 
                 /**
                  * 检查单个项目的兼容性，返回选中版本；不兼容时返回 null 并向 [failuresOut] 追加一条原因。
+                 *
+                 * 兼容性检查流程：
+                 * - MOD 类型：先检查 MC 版本 → 再检查该 MC 版本对应的加载器
+                 * - 资源包/存档/光影包：仅检查 MC 版本，跳过加载器检查
                  */
                 suspend fun processProject(
                     currentPlatform: Platform,
                     currentProjectId: String,
-                    failuresOut: MutableList<CompatibilityFailure>
+                    failuresOut: MutableList<CompatibilityFailure>,
+                    isModType: Boolean = false
                 ): Pair<PlatformProject, PlatformVersion>? {
                     val project = getProjectByVersion(currentProjectId, currentPlatform)
                     val projectTitle = project.platformTitle()
 
-                    // 第一步：检查项目级模组加载器支持（即模组卡片底部显示的加载器）
-                    // 使用精确匹配，避免 "NeoForge" 包含 "Forge" 导致的误判
-                    val projectLoaders = project.platformModLoaders()?.map { it.getDisplayName() } ?: emptyList()
-                    val loaderSupported = projectLoaders.isEmpty() || modLoader.isEmpty() ||
-                        projectLoaders.any { it == modLoader }
-
-                    if (!loaderSupported) {
-                        failuresOut.add(
-                            CompatibilityFailure(
-                                projectTitle = projectTitle,
-                                platform = currentPlatform,
-                                projectId = currentProjectId,
-                                reason = reasonProvider.noMatchingLoader(modLoader, projectLoaders.toSet())
-                            )
-                        )
-                        return null
-                    }
-
-                    // 第二步：获取并初始化所有版本
+                    // 第一步：获取并初始化所有版本
                     val allVersions = getVersions(currentProjectId, currentPlatform)
                         .initAllGeneric(currentProjectId = currentProjectId)
 
@@ -205,7 +200,7 @@ private class QuickDownloadViewModel(
                         return null
                     }
 
-                    // 第三步：过滤出支持当前 MC 版本的版本
+                    // 第二步：过滤出支持当前 MC 版本的版本
                     val mcMatched = allVersions.filter { version ->
                         version.platformGameVersion().any { mcVersion == it || mcVersion.startsWith(it) || it.startsWith(mcVersion) }
                     }
@@ -223,6 +218,25 @@ private class QuickDownloadViewModel(
                             )
                         )
                         return null
+                    }
+
+                    // 第三步：仅 MOD 类型再检查加载器兼容性
+                    if (isModType) {
+                        val projectLoaders = project.platformModLoaders()?.map { it.getDisplayName() } ?: emptyList()
+                        val loaderSupported = projectLoaders.isEmpty() || modLoader.isEmpty() ||
+                            projectLoaders.any { it == modLoader }
+
+                        if (!loaderSupported) {
+                            failuresOut.add(
+                                CompatibilityFailure(
+                                    projectTitle = projectTitle,
+                                    platform = currentPlatform,
+                                    projectId = currentProjectId,
+                                    reason = reasonProvider.noMatchingLoader(modLoader, projectLoaders.toSet())
+                                )
+                            )
+                            return null
+                        }
                     }
 
                     // initAllGeneric 已按发布日期降序排序，取第一个即为最新版本
@@ -245,7 +259,7 @@ private class QuickDownloadViewModel(
                                             processedProjects.add(dep.projectId)
                                         }
                                         runCatching {
-                                            processProject(dep.platform, dep.projectId, failuresOut)
+                                            processProject(dep.platform, dep.projectId, failuresOut, isModType)
                                         }.getOrNull()
                                     }
                                 }
@@ -260,18 +274,31 @@ private class QuickDownloadViewModel(
                     return project to latestVersion
                 }
 
+                val isModType = classes == PlatformClasses.MOD
                 processedProjects.add(projectId)
-                val targetResult = processProject(platform, projectId, failures)
+                val targetResult = processProject(platform, projectId, failures, isModType)
 
                 if (targetResult == null) {
-                    // 主资源不兼容，直接返回失败
                     state = QuickDownloadState.Failed(failures)
                 } else if (failures.isNotEmpty()) {
-                    // 某个前置依赖不兼容
                     state = QuickDownloadState.Failed(failures)
                 } else {
-                    // 全部兼容
-                    state = QuickDownloadState.Ready(targetResult.first, targetResult.second, deps)
+                    // 光影包：检查 Iris/Oculus/OptiFine 是否安装
+                    var shaderWarning: String? = null
+                    if (classes == PlatformClasses.SHADERS) {
+                        shaderWarning = checkShaderDependency(
+                            gameVersion = gameVersion,
+                            mcVersion = mcVersion,
+                            modLoader = modLoader,
+                            context = reasonProvider.context
+                        )
+                    }
+                    state = QuickDownloadState.Ready(
+                        targetProject = targetResult.first,
+                        targetVersion = targetResult.second,
+                        dependencies = deps,
+                        shaderWarning = shaderWarning
+                    )
                 }
             } catch (e: Exception) {
                 state = QuickDownloadState.Error(e.message ?: "Download failed")
@@ -287,7 +314,7 @@ private class QuickDownloadViewModel(
 /**
  * 提供失败原因的本地化文本
  */
-class FailureReasonProvider(private val context: android.content.Context) {
+class FailureReasonProvider(val context: android.content.Context) {
     fun noVersions(): String = context.getString(R.string.download_quick_download_no_versions)
 
     fun noMatchingMcVersion(currentMc: String, supportedMc: Set<String>): String {
@@ -300,6 +327,99 @@ class FailureReasonProvider(private val context: android.content.Context) {
         return context.getString(R.string.download_quick_download_no_loader, currentLoader, supportedText)
     }
 }
+
+// ─── 着色器模组检测 ────────────────────────────────────────────────
+
+/**
+ * 检测当前实例是否安装了 Iris、Oculus 或 OptiFine。
+ * 每个实例（按游戏目录）只检测一次，结果缓存复用。
+ *
+ * @return 如果未安装任何着色器模组，返回提醒文本；否则返回 null
+ */
+private suspend fun checkShaderDependency(
+    gameVersion: Version,
+    mcVersion: String,
+    modLoader: String,
+    context: android.content.Context
+): String? {
+    val gameDir = gameVersion.getGameDir().absolutePath
+    val cached = shaderCheckCache[gameDir]
+    if (cached != null) {
+        // 已缓存：已安装着色器模组 → 无需提醒
+        return if (cached) null else getShaderSuggestion(mcVersion, modLoader, context)
+    }
+
+    // 扫描本地 mods 目录
+    val modsDir = VersionFolders.MOD.getDir(gameVersion.getGameDir())
+    val hasShaderMod = try {
+        val mods = AllModReader(modsDir).readAllLocals()
+        mods.any { mod ->
+            mod.id.equals("iris", ignoreCase = true) ||
+            mod.id.equals("oculus", ignoreCase = true) ||
+            mod.loader == ModLoader.OPTIFINE
+        }
+    } catch (_: Exception) {
+        false
+    }
+
+    shaderCheckCache[gameDir] = hasShaderMod
+    return if (hasShaderMod) null else getShaderSuggestion(mcVersion, modLoader, context)
+}
+
+/**
+ * 根据 MC 版本和加载器类型，返回着色器模组建议文本。
+ */
+private fun getShaderSuggestion(
+    mcVersion: String,
+    modLoader: String,
+    context: android.content.Context
+): String {
+    val mcVer = parseMcVersion(mcVersion)
+
+    return when {
+        // Forge 1.16.5 ~ 1.20.1 → Oculus
+        modLoader == ModLoader.FORGE.displayName &&
+            mcVer != null && mcVer >= intArrayOf(1, 16, 5) && mcVer <= intArrayOf(1, 20, 1) ->
+            context.getString(R.string.download_quick_download_shader_suggest_oculus)
+
+        // Fabric / Quilt 1.16.5+ → Iris
+        (modLoader == ModLoader.FABRIC.displayName || modLoader == ModLoader.QUILT.displayName) &&
+            mcVer != null && mcVer >= intArrayOf(1, 16, 5) ->
+            context.getString(R.string.download_quick_download_shader_suggest_iris)
+
+        // NeoForge 1.21+ → Iris
+        modLoader == ModLoader.NEOFORGE.displayName &&
+            mcVer != null && mcVer >= intArrayOf(1, 21) ->
+            context.getString(R.string.download_quick_download_shader_suggest_iris)
+
+        // 其他 → OptiFine
+        else -> context.getString(R.string.download_quick_download_shader_suggest_optifine)
+    }
+}
+
+/**
+ * 将 MC 版本字符串解析为整数数组，例如 "1.20.1" → [1, 20, 1]。
+ * 解析失败返回 null。
+ */
+private fun parseMcVersion(version: String): IntArray? {
+    return try {
+        val parts = version.split(".").map { it.toInt() }
+        if (parts.size < 2) null else parts.toIntArray()
+    } catch (_: NumberFormatException) {
+        null
+    }
+}
+
+/** 比较两个 MC 版本数组，返回 this >= other */
+private operator fun IntArray.compareTo(other: IntArray): Int {
+    for (i in 0 until minOf(size, other.size)) {
+        val cmp = this[i] - other[i]
+        if (cmp != 0) return cmp
+    }
+    return size - other.size
+}
+
+// ─── UI ────────────────────────────────────────────────────────────
 
 @Composable
 fun QuickDownloadDialog(
@@ -415,6 +535,11 @@ fun QuickDownloadDialog(
                                 addAll(state.dependencies)
                             }
 
+                            // 光影包着色器模组警告
+                            state.shaderWarning?.let { warning ->
+                                ShaderWarningCard(warning = warning)
+                            }
+
                             Text(
                                 text = stringResource(R.string.download_quick_download_list),
                                 style = MaterialTheme.typography.titleMedium
@@ -472,6 +597,22 @@ fun QuickDownloadDialog(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ShaderWarningCard(warning: String) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer
+    ) {
+        Text(
+            text = warning,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(12.dp)
+        )
     }
 }
 

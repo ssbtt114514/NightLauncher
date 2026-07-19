@@ -197,6 +197,9 @@
     <string name="download_quick_download_no_versions">该资源没有可用的版本</string>
     <string name="download_quick_download_no_mc_version">当前实例版本为 %1$s，该资源仅支持：%2$s</string>
     <string name="download_quick_download_no_loader">当前实例加载器为 %1$s，该资源仅支持：%2$s</string>
+    <string name="download_quick_download_shader_suggest_iris">未检测到 Iris/Oculus/OptiFine，建议安装 Iris 模组以获得光影效果</string>
+    <string name="download_quick_download_shader_suggest_oculus">未检测到 Iris/Oculus/OptiFine，建议安装 Oculus 模组以获得光影效果</string>
+    <string name="download_quick_download_shader_suggest_optifine">未检测到 Iris/Oculus/OptiFine，建议使用 OptiFine 客户端以获得光影效果</string>
     <string name="download_game_failed_to_get_versions">获取版本失败：%s，点击重试。</string>
     <string name="download_game_type_release">正式版</string>
     <string name="download_game_type_snapshot">快照版</string>
