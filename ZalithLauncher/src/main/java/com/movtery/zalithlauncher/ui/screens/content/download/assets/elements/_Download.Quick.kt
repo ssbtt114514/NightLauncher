@@ -171,7 +171,25 @@ private class QuickDownloadViewModel(
                     val project = getProjectByVersion(currentProjectId, currentPlatform)
                     val projectTitle = project.platformTitle()
 
-                    // 先获取并初始化所有版本
+                    // 第一步：检查项目级模组加载器支持（即模组卡片底部显示的加载器）
+                    // 使用精确匹配，避免 "NeoForge" 包含 "Forge" 导致的误判
+                    val projectLoaders = project.platformModLoaders()?.map { it.getDisplayName() } ?: emptyList()
+                    val loaderSupported = projectLoaders.isEmpty() || modLoader.isEmpty() ||
+                        projectLoaders.any { it == modLoader }
+
+                    if (!loaderSupported) {
+                        failuresOut.add(
+                            CompatibilityFailure(
+                                projectTitle = projectTitle,
+                                platform = currentPlatform,
+                                projectId = currentProjectId,
+                                reason = reasonProvider.noMatchingLoader(modLoader, projectLoaders.toSet())
+                            )
+                        )
+                        return null
+                    }
+
+                    // 第二步：获取并初始化所有版本
                     val allVersions = getVersions(currentProjectId, currentPlatform)
                         .initAllGeneric(currentProjectId = currentProjectId)
 
@@ -187,7 +205,7 @@ private class QuickDownloadViewModel(
                         return null
                     }
 
-                    // 第一步：过滤出支持当前 MC 版本的版本
+                    // 第三步：过滤出支持当前 MC 版本的版本
                     val mcMatched = allVersions.filter { version ->
                         version.platformGameVersion().any { mcVersion == it || mcVersion.startsWith(it) || it.startsWith(mcVersion) }
                     }
@@ -207,29 +225,8 @@ private class QuickDownloadViewModel(
                         return null
                     }
 
-                    // 第二步：在支持当前 MC 版本的基础上，过滤出支持当前加载器的版本
-                    val loaderMatched = mcMatched.filter { version ->
-                        val loaders = version.platformLoaders().map { it.getDisplayName() }
-                        loaders.isEmpty() || modLoader.isEmpty() || loaders.any { modLoader.contains(it) }
-                    }
-
-                    if (loaderMatched.isEmpty()) {
-                        val supportedLoaders = mcMatched
-                            .flatMap { it.platformLoaders().map { l -> l.getDisplayName() } }
-                            .toSet()
-                        failuresOut.add(
-                            CompatibilityFailure(
-                                projectTitle = projectTitle,
-                                platform = currentPlatform,
-                                projectId = currentProjectId,
-                                reason = reasonProvider.noMatchingLoader(modLoader, supportedLoaders)
-                            )
-                        )
-                        return null
-                    }
-
                     // initAllGeneric 已按发布日期降序排序，取第一个即为最新版本
-                    val latestVersion = loaderMatched.first()
+                    val latestVersion = mcMatched.first()
 
                     // 递归处理必需依赖
                     val requiredDeps = latestVersion.platformDependencies()
