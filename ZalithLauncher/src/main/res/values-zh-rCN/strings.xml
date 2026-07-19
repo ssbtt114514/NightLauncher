@@ -254,7 +254,7 @@
     <string name="download_assets_filter_sort_by_popularity">人气</string>
     <string name="download_assets_filter_sort_by_recently_created">最近创建</string>
     <string name="download_assets_filter_sort_by_recently_updated">最近更新</string>
-    <string name="download_assets_result_authors">作者：%s</string>
+    <string name="download_assets_result_authors">作者：</string>
     <string name="download_assets_result_previous_page">上一页</string>
     <string name="download_assets_result_next_page">下一页</string>
     <string name="download_assets_failed_to_get_result">获取搜索结果失败：%s，点击重试。</string>

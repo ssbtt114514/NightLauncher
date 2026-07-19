@@ -239,7 +239,7 @@
     <string name="download_assets_filter_sort_by_popularity">人氣</string>
     <string name="download_assets_filter_sort_by_recently_created">最近建立</string>
     <string name="download_assets_filter_sort_by_recently_updated">最近更新</string>
-    <string name="download_assets_result_authors">作者：%s</string>
+    <string name="download_assets_result_authors">作者：</string>
     <string name="download_assets_result_previous_page">上一頁</string>
     <string name="download_assets_result_next_page">下一頁</string>
     <string name="download_assets_failed_to_get_result">取得搜尋結果失敗：%s，點擊重試。</string>

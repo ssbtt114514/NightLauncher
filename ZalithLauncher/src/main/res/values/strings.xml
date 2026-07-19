@@ -254,7 +254,7 @@
     <string name="download_assets_filter_sort_by_popularity">Popularity</string>
     <string name="download_assets_filter_sort_by_recently_created">Recently Created</string>
     <string name="download_assets_filter_sort_by_recently_updated">Recently Updated</string>
-    <string name="download_assets_result_authors">By %s</string>
+    <string name="download_assets_result_authors">By </string>
     <string name="download_assets_result_previous_page">Previous Page</string>
     <string name="download_assets_result_next_page">Next Page</string>
     <string name="download_assets_failed_to_get_result">Failed to get search results: %s. Tap to retry.</string>

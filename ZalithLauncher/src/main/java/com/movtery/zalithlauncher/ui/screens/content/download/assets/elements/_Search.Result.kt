@@ -641,7 +641,7 @@ fun ProjectTitleHead(
                     modifier = Modifier
                         .weight(0.4f, fill = false)
                         .alpha(0.7f),
-                    text = stringResource(R.string.download_assets_result_authors, it),
+                    text = stringResource(R.string.download_assets_result_authors) + it,
                     style = MaterialTheme.typography.labelSmall,
                     maxLines = 1
                 )
