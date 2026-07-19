@@ -655,7 +655,7 @@
     <string name="control_editor_exit_message">Doğrudan çıkmak istediğinizden emin misiniz? Bu işlem, yapılan tüm değişikliklerin kaydedilmemesine neden olacaktır. Kaydetmeniz gerekiyorsa, lütfen düzenleyici menüsünü kontrol edin.</string>
     <string name="control_editor_exit_confirm">Çık</string>
     <string name="about_launcher_title">Başlatıcı Hakkında</string>
-    <string name="about_launcher_version">Zalith Launcher2 temelli</string>
+    <string name="about_launcher_version">Başlatıcı Versiyonu: %s</string>
     <string name="about_launcher_author_movtery_title">MovTery</string>
     <string name="about_launcher_author_movtery_text">%s\'nin Oluşturucusu</string>
     <string name="about_launcher_project_link">Proje Linki</string>

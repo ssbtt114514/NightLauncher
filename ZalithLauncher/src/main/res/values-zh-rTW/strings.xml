@@ -980,7 +980,7 @@
     <string name="settings_launcher_swap_animate_type_summary">根據您的需求，選擇最適合自己的頁面切換動畫</string>
     <!--  關於  -->
     <string name="about_launcher_title">關於啟動器</string>
-    <string name="about_launcher_version">本專案基於 Zalith Launcher2 開發</string>
+    <string name="about_launcher_version">啟動器版本：%s</string>
     <string name="about_launcher_author_movtery_title">墨北 MovTery</string>
     <string name="about_launcher_author_movtery_text">%s 的作者</string>
     <string name="about_author_ssbtt_title">桑葚不太甜ssbtt</string>

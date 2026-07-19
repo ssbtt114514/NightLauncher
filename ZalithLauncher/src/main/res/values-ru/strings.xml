@@ -814,7 +814,7 @@
     <string name="control_editor_exit_message">Вы уверены, что хотите выйти без сохранения? Все внесённые изменения будут потеряны. Чтобы сохранить, воспользуйтесь меню редактора.</string>
     <string name="control_editor_exit_confirm">Выйти без сохранения</string>
     <string name="about_launcher_title">О лаунчере</string>
-    <string name="about_launcher_version">Основано на Zalith Launcher2</string>
+    <string name="about_launcher_version">Версия лаунчера: %s</string>
     <string name="about_launcher_author_movtery_title">MovTery</string>
     <string name="about_launcher_author_movtery_text">Автор %s</string>
     <string name="about_launcher_project_link">Ссылка на проект</string>

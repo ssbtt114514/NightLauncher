@@ -1034,7 +1034,7 @@
     <string name="control_editor_exit_message">Tem certeza de que deseja sair diretamente?\nIsso fará com que todas as alterações sejam desfeitas. Se precisar salvar, verifique o menu do editor.</string>
     <string name="control_editor_exit_confirm">Sair sem salvar</string>
     <string name="about_launcher_title">Sobre o Launcher</string>
-    <string name="about_launcher_version">Baseado em Zalith Launcher2</string>
+    <string name="about_launcher_version">Versão do Launcher: %s</string>
     <string name="about_launcher_author_movtery_title">MovTery</string>
     <string name="about_launcher_author_movtery_text">Autor de %s</string>
     <string name="about_launcher_project_link">Link do Projeto</string>

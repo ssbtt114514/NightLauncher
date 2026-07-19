@@ -1252,7 +1252,7 @@
     <string name="control_editor_exit_confirm">直接退出</string>
     <!--  关于  -->
     <string name="about_launcher_title">关于启动器</string>
-    <string name="about_launcher_version">本项目基于Zalith Launcher2开发</string>
+    <string name="about_launcher_version">启动器版本：%s</string>
     <string name="about_launcher_author_movtery_title">墨北MovTery</string>
     <string name="about_launcher_author_movtery_text">%s 的作者</string>
     <string name="about_author_ssbtt_title">桑葚不太甜ssbtt</string>

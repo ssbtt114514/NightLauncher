@@ -1253,7 +1253,7 @@
     <string name="control_editor_exit_confirm">Exit Directly</string>
     <!-- About -->
     <string name="about_launcher_title">About Launcher</string>
-    <string name="about_launcher_version">Based on Zalith Launcher2</string>
+    <string name="about_launcher_version">Launcher Version: %s</string>
     <string name="about_launcher_author_movtery_title">MovTery</string>
     <string name="about_launcher_author_movtery_text">Author of %s</string>
     <string name="about_author_ssbtt_title">桑葚不太甜ssbtt</string>

@@ -722,7 +722,7 @@
     <string name="control_editor_exit_message">Yakin ingin langsung keluar? Ini bakal bikin perubahan yang Anda buat tidak tersimpan. Kalo kamu perlu menyimpan, silakan cek menu editor.</string>
     <string name="control_editor_exit_confirm">Langsung Keluar</string>
     <string name="about_launcher_title">Tentang Launcher</string>
-    <string name="about_launcher_version">Berdasarkan Zalith Launcher2</string>
+    <string name="about_launcher_version">Versi Launcher: %s</string>
     <string name="about_launcher_author_movtery_title">MovTery</string>
     <string name="about_launcher_author_movtery_text">Pembuat %s</string>
     <string name="about_launcher_project_link">Link Project</string>

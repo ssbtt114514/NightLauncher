@@ -243,6 +243,9 @@ private fun NavigationUI(
                         key = key,
                         settingsScreenKey = settingsScreenKey,
                         mainScreenKey = mainScreenKey,
+                        checkUpdate = {
+                            eventViewModel.sendEvent(EventViewModel.Event.CheckUpdate)
+                        },
                         openLicense = openLicenseScreen,
                         openLink = { url ->
                             eventViewModel.sendEvent(EventViewModel.Event.OpenLink(url))
