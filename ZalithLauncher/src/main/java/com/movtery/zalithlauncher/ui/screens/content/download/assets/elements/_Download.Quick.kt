@@ -197,17 +197,17 @@ private class QuickDownloadViewModel(
             state = QuickDownloadState.Loading
             processedProjects.clear()
 
-            val gameVersion = this.gameVersion ?: VersionsManager.currentVersion.value ?: run {
+            val targetGameVersion = gameVersion ?: VersionsManager.currentVersion.value ?: run {
                 state = QuickDownloadState.NoGameVersion
                 return@launch
             }
 
-            val mcVersion = gameVersion.getVersionInfo()?.minecraftVersion ?: run {
+            val mcVersion = targetGameVersion.getVersionInfo()?.minecraftVersion ?: run {
                 state = QuickDownloadState.Error("Failed to get Minecraft version")
                 return@launch
             }
 
-            val modLoader = gameVersion.getVersionInfo()?.loaderInfo?.loader?.displayName ?: ""
+            val modLoader = targetGameVersion.getVersionInfo()?.loaderInfo?.loader?.displayName ?: ""
             val isModType = classes == PlatformClasses.MOD
 
             try {
@@ -435,7 +435,7 @@ private class QuickDownloadViewModel(
                     var shaderWarning: String? = null
                     if (classes == PlatformClasses.SHADERS) {
                         shaderWarning = checkShaderDependency(
-                            gameVersion = gameVersion,
+                            gameVersion = targetGameVersion,
                             mcVersion = mcVersion,
                             modLoader = modLoader,
                             context = reasonProvider.context
@@ -736,8 +736,8 @@ fun QuickDownloadDialog(
                                 Button(
                                     modifier = Modifier.weight(0.5f),
                                     onClick = {
-                                        val gameVersion = gameVersion ?: VersionsManager.currentVersion.value ?: return@Button
-                                        val gameVersions = listOf(gameVersion)
+                                        val targetGameVersion = gameVersion ?: VersionsManager.currentVersion.value ?: return@Button
+                                        val gameVersions = listOf(targetGameVersion)
 
                                         onDownload(
                                             QuickDownloadInfo(
